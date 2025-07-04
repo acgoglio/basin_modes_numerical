@@ -1,0 +1,8 @@
+# This code extracts the main amplitude and energy modes from a ssh time series in a list of locations
+# Written by AC Goglio on July 2025
+#
+# HOW TO RUN IT:
+# 0) select the locations in idx_pt.coo file
+# 1) set point_ini.py file
+# 2) run run_point_BM.sh script 
+#
