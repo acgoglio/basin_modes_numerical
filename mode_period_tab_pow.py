@@ -10,8 +10,11 @@ mpl.use("Agg")  # For non-interactive backend
 sea_gp_num=int(145023)
 
 # Load dataset
-indir = "/work/cmcc/ag15419/basin_modes_20not/"
+indir = "/work/cmcc/ag15419/basin_modes_num/"
 ds = xr.open_dataset(os.path.join(indir, "basin_modes_pow_med.nc"))
+
+# Choose the uncertainty (1->variable; 0->constant))
+flag_var_unc = 1
 
 # Extract m?_T variables
 modes_vars = [var for var in ds.data_vars if var.startswith("m") and "_T" in var]
@@ -94,66 +97,67 @@ plt.tight_layout()
 plt.savefig(os.path.join(indir, "hist_all_pow_table10_singletable.png"), dpi=300)
 
 ############################
-# --- Grouping algorithm ---
-tolerance = 0.4
-remaining = rounded_periods.copy()
-greedy_groups = []
-
-while not remaining.empty:
-    mode = remaining.mode()[0]
-    group = remaining[np.abs(remaining - mode) <= tolerance]
-    greedy_groups.append((round(group.mean(), 2), len(group)))
-    remaining = remaining.drop(group.index)
-
-df_greedy = pd.DataFrame(greedy_groups, columns=["Grouped_Period", "Count"])
-df_greedy["%"] = (df_greedy["Count"] / sea_gp_num * 100).round(2)
-df_greedy = df_greedy.sort_values("Count", ascending=False).reset_index(drop=True)
-df_greedy.to_csv(os.path.join(indir, "periods_grouped_pow.csv"), index=False)
-df_greedy["Percentage"] = df_greedy["Count"] / sea_gp_num * 100
-
-# --- Histogram and table of grouped periods ---
-# --- Top 10 tab ---
-df_top10 = df_greedy.nlargest(10, "Count")
-
-# --- Tab ---
-table_data = list(zip(
-    df_top10["Grouped_Period"].round(2),
-    df_top10["Count"],
-    df_top10["Percentage"].round(1)
-))
-column_labels = ["Grouped Period (h)", "Frequency (grid points)", "Percentage (%)"]
-
-# --- Fig 2 subplots ---
-fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(10, 8), gridspec_kw={'height_ratios': [2.5, 1]})
-
-# --- Subplot 1: Histogram ---
-ax1.bar(df_greedy["Grouped_Period"], df_greedy["Count"],
-        width=0.4, color="tab:green", edgecolor="black")
-
-ax1.set_xlabel(f"Grouped Period (hours ±{tolerance}h)")
-ax1.set_ylabel("Frequency (grid points)")
-ax1.set_title("Frequency of Mode Periods in the Mediterranean Sea (Grouped)")
-ax1.grid(axis="y", linestyle="--", alpha=0.6)
-ax1.tick_params(axis='x', rotation=45)
-ax1.set_ylim(0,150000)
-
-# --- Subplot 2: Table ---
-ax2.axis('off') 
-#ax2.text(0.5, 1.0, "Top 10 Main Modes (Grouped)", fontsize=12, ha='center', transform=ax2.transAxes)
-table = ax2.table(cellText=table_data,
-                  colLabels=column_labels,
-                  cellLoc='center',
-                  loc='center')
-
-table.auto_set_font_size(False)
-table.set_fontsize(10)
-table.scale(1.2, 1.3)  
-
-# Tab header
-for (row, col), cell in table.get_celld().items():
-    if row == 0:
-        cell.set_facecolor('#D3D3D3')  # gray
-        cell.set_text_props(weight='bold')
-# --- Save ---
-plt.tight_layout()
-plt.savefig(os.path.join(indir, "hist_grouped_pow_table10_singletable.png"), dpi=300)
+if flag_var_unc == 0 :
+   # --- Grouping algorithm ---
+   tolerance = 0.4
+   remaining = rounded_periods.copy()
+   greedy_groups = []
+   
+   while not remaining.empty:
+       mode = remaining.mode()[0]
+       group = remaining[np.abs(remaining - mode) <= tolerance]
+       greedy_groups.append((round(group.mean(), 2), len(group)))
+       remaining = remaining.drop(group.index)
+   
+   df_greedy = pd.DataFrame(greedy_groups, columns=["Grouped_Period", "Count"])
+   df_greedy["%"] = (df_greedy["Count"] / sea_gp_num * 100).round(2)
+   df_greedy = df_greedy.sort_values("Count", ascending=False).reset_index(drop=True)
+   df_greedy.to_csv(os.path.join(indir, "periods_grouped_pow.csv"), index=False)
+   df_greedy["Percentage"] = df_greedy["Count"] / sea_gp_num * 100
+   
+   # --- Histogram and table of grouped periods ---
+   # --- Top 10 tab ---
+   df_top10 = df_greedy.nlargest(10, "Count")
+   
+   # --- Tab ---
+   table_data = list(zip(
+       df_top10["Grouped_Period"].round(2),
+       df_top10["Count"],
+       df_top10["Percentage"].round(1)
+   ))
+   column_labels = ["Grouped Period (h)", "Frequency (grid points)", "Percentage (%)"]
+   
+   # --- Fig 2 subplots ---
+   fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(10, 8), gridspec_kw={'height_ratios': [2.5, 1]})
+   
+   # --- Subplot 1: Histogram ---
+   ax1.bar(df_greedy["Grouped_Period"], df_greedy["Count"],
+           width=0.4, color="tab:green", edgecolor="black")
+   
+   ax1.set_xlabel(f"Grouped Period (hours ±{tolerance}h)")
+   ax1.set_ylabel("Frequency (grid points)")
+   ax1.set_title("Frequency of Mode Periods in the Mediterranean Sea (Grouped)")
+   ax1.grid(axis="y", linestyle="--", alpha=0.6)
+   ax1.tick_params(axis='x', rotation=45)
+   ax1.set_ylim(0,150000)
+   
+   # --- Subplot 2: Table ---
+   ax2.axis('off') 
+   #ax2.text(0.5, 1.0, "Top 10 Main Modes (Grouped)", fontsize=12, ha='center', transform=ax2.transAxes)
+   table = ax2.table(cellText=table_data,
+                     colLabels=column_labels,
+                     cellLoc='center',
+                     loc='center')
+   
+   table.auto_set_font_size(False)
+   table.set_fontsize(10)
+   table.scale(1.2, 1.3)  
+   
+   # Tab header
+   for (row, col), cell in table.get_celld().items():
+       if row == 0:
+           cell.set_facecolor('#D3D3D3')  # gray
+           cell.set_text_props(weight='bold')
+   # --- Save ---
+   plt.tight_layout()
+   plt.savefig(os.path.join(indir, "hist_grouped_pow_table10_singletable.png"), dpi=300)

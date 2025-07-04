@@ -15,11 +15,11 @@ from scipy.signal import find_peaks
 mpl.use('Agg')
 
 ########
-work_dir='/work/cmcc/ag15419/basin_modes_num/plots/'
+work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m/plots_all/'
 
 # Inputs and outputs
-start_date = "20150110" 
-end_date = "20150130" 
+start_date = "20150104" 
+end_date = "20150204" 
 
 # BF
 #all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB_2/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
@@ -33,15 +33,15 @@ end_date = "20150130"
 # P cost+f
 #all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_4NT_P/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
 # Zonal wind 20 m/s
-all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
+#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
 # Meridional wind 20 m/s
-#all_files = sorted(glob.glob("")
+all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
 # Only Patm
-#all_files = sorted(glob.glob("")
+#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
 
 # Exp tag
 Med_reg=str(sys.argv[3])
-exp='ZW20_1h_'+Med_reg
+exp='WIND_M_1h_'+Med_reg
 
 # Lat and lon indexes
 lat_idx = int(sys.argv[2]) 

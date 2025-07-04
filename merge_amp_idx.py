@@ -10,8 +10,8 @@ x_edges = [300, 421, 541, 661, 781, 901, 1021, 1141, 1261, 1307]
 y_edges = [0, 128, 255, 380]
 
 # Input and output paths
-indir = "/work/cmcc/ag15419/basin_modes_20not/"
-outfile = "/work/cmcc/ag15419/basin_modes_20not/basin_modes_amp_med.nc"
+indir = "/work/cmcc/ag15419/basin_modes_num/"
+outfile = "/work/cmcc/ag15419/basin_modes_num/basin_modes_amp_med.nc"
 
 # Open the base dataset (box 1)
 ds_full = xr.open_dataset(os.path.join(indir, "basin_modes_amp_1.nc")).copy(deep=True)

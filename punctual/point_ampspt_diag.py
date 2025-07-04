@@ -12,63 +12,19 @@ from matplotlib.ticker import FuncFormatter
 from scipy.signal import detrend
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks
+import point_ini
 mpl.use('Agg')
 
 ########
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m/plots_all/'
-
-# Inputs and outputs
-start_date = "20150104" 
-end_date = "20150204" 
-# BF
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB_2/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB/EXP00_BF/20*/model/medfs-eas9_1ts_20*_2D_grid_T.nc"))
-# NO BF
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# BF f
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_3NT_AB/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# P cost
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_5NT_P/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# P cost+f
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_4NT_P/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# Zonal wind 20 m/s
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# Meridional wind 20 m/s
-all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# Atm Pressure
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-
 # Exp tag
 Med_reg=str(sys.argv[3])
-exp='WIND_M_1h_'+Med_reg
+exp=tag+Med_reg
 
 # Lat and lon indexes
 lat_idx = int(sys.argv[2]) 
 lon_idx = int(sys.argv[1]) 
 
-# Model time step in seconds
-dt = 3600 #90 60*60
-
-# Number of modes to analyze (n_modes = 'auto' if you want to analyze all the modes)
-n_modes = 'auto'
-
-# Flag and threshold [h] for filtering the spectrum the threshold is also used as plot minimum 
-flag_filter='true'
-th_filter=40
-
-# Flag for Gaussian smoothing of the spectrum: true, false or plot (to use the original spt but add the plot of the smoothed spt)
-flag_smooth='false'
-sigma=15 
-
-# To order by period instead of by amplitude set flag_T_order = 1
-flag_T_order = 1
-
-# Filter out modes with low energy, e.g. 0.10 means that all the modes with energy<10% of the total energy are rm (to avoid the filtering set energy_threshold_ratio = 0)
-energy_threshold_ratio = 0.002
-
-# Flag: use segmented (averaged) spectrum or full time series
-flag_segmented_spectrum = True  # False to disable and use full spectrum
-segment_len_days = 5  # length of each segment (in days) if segmented spectrum is used
+all_files=sorted(glob.glob(file_template))
 
 ###################
 # Select the period
@@ -110,11 +66,11 @@ time_series_clean = time_series_point[valid_indices]
 #print ('Check clean time series:',time_series_clean.shape,time_series_clean)
 
 #### SPECTRUM ANALYSIS
+# Compute FFT
 
 spt_len = len(time_series_clean)
 print('Time series values:', spt_len)
 
-# Compute FFT
 if flag_segmented_spectrum:
 
     print(f"Segmented spectrum: averaging over {segment_len_days}-day segments")
@@ -123,38 +79,54 @@ if flag_segmented_spectrum:
     num_segments = len(time_series_clean) // segment_len
     print(f"Segment length (in steps): {segment_len}, Total segments: {num_segments}")
 
-    all_amplitudes = []
+    spt_segments = []
+    amp_segments = []
 
     for i in range(num_segments):
         segment = time_series_clean[i * segment_len : (i + 1) * segment_len]
+
         fft_segment = np.fft.fft(segment)
-        freq_segment = np.fft.fftfreq(len(segment), d=dt)
-        mask = freq_segment > 0
-        amp_segment = (np.abs(fft_segment[mask]) ** 2) / len(segment)
-        all_amplitudes.append(amp_segment)
+        freq_segment = np.fft.fftfreq(segment_len, d=dt)
+
+        # Select only positive frequencies
+        half_len = segment_len // 2
+        freq_positive = freq_segment[:half_len]
+        fft_positive = fft_segment[:half_len]
+        mask = freq_positive > 0
+        freq_positive = freq_positive[mask]
+        fft_positive = fft_positive[mask]
+
+        # Computr Power Spectral Density
+        spt_seg = (np.abs(fft_positive) ** 2) / segment_len
+        # Calcola ampiezza spettrale corretta (fattore 2/N)
+        amp_seg = (2 / segment_len) * np.abs(fft_positive)
+
+        spt_segments.append(spt_seg)
+        amp_segments.append(amp_seg)
 
     # Average the spectra
-    amplitudes = np.mean(all_amplitudes, axis=0)
-    # Select only positive frequencies 
-    freq_positive = freq_segment[mask]  # Same for all segments
+    amplitudes = np.mean(amp_segments, axis=0)
+    # Select only positive frequencies
+    freq_positive = freq_positive  # Same for all segments
     # Compute Periods in hours
     periods = 1 / freq_positive / 3600
 
 else:
     # Classical spectrum from full series
     fft = np.fft.fft(time_series_clean)
-    freq = np.fft.fftfreq(len(time_series_clean), d=dt)
+    freq = np.fft.fftfreq(spt_len, d=dt)
 
     # Select only positive frequencies (excluding zero and Nyquist)
-    half_len = len(time_series_clean) // 2
-    freq_positive = freq[:half_len]
-    fft_positive = fft[:half_len]
+    half_spt_len = spt_len // 2
+    freq_positive = freq[:half_spt_len]
+    fft_positive = fft[:half_spt_len]
+
     mask = freq_positive > 0
     freq_positive = freq_positive[mask]
     fft_positive = fft_positive[mask]
 
     # Compute Power Spectrum Density (normalized)
-    amplitudes = (np.abs(fft_positive) ** 2) / len(time_series_clean) #**2
+    amplitudes = (np.abs(fft_positive) ** 2) / spt_len  #**2
     # Compute Periods in hours
     periods = 1 / freq_positive / 3600
 
@@ -170,17 +142,20 @@ if flag_filter == 'true':
     freq_positive = freq_positive[freq_mask]
     periods = 1 / freq_positive / 3600
 
+
 # Smooth
 if flag_smooth == 'true':
    print ('Smooth = true')
+   #spt_smooth = gaussian_filter1d(spt, sigma=sigma)
    amp_smooth = gaussian_filter1d(amplitudes, sigma=sigma)
 else:
+   #spt_smooth = spt
    amp_smooth = amplitudes
    if flag_smooth == 'plot':
+      #spt_smooth_2plot = gaussian_filter1d(spt, sigma=sigma)
       amp_smooth_2plot = gaussian_filter1d(amplitudes, sigma=sigma)
 
-if energy_threshold_ratio == 0: 
-
+if amplitude_threshold_ratio == 0:
    # Found peaks in spt and in amplitude:
    amp_peaks, _ = find_peaks(amp_smooth)
    amp_peak_frequencies = freq_positive[amp_peaks]
@@ -202,19 +177,19 @@ else:
    # Find peaks in the smoothed power spectrum (amp_smooth = PSD)
    amp_peaks, _ = find_peaks(amp_smooth)
    amp_peak_frequencies = freq_positive[amp_peaks]
-   amp_peak_amplitudes = amp_smooth[amp_peaks]  # these are energies (m²)
-   
-   # Compute total spectral energy (sum of all PSD values)
-   total_energy = np.sum(amp_smooth)
-   
+   amp_peak_amplitudes = amp_smooth[amp_peaks]  
+
+   # Compute total spectral amplitude (sum of all PSD values)
+   total_amplitude = np.sum(amp_smooth)
+
    # Define energy threshold: keep only peaks contributing ≥ 10% of total
-   energy_threshold = energy_threshold_ratio * total_energy
-   
+   amplitude_threshold = amplitude_threshold_ratio * total_amplitude
+
    # Filter peaks by energy contribution
-   mask_significant = amp_peak_amplitudes >= energy_threshold
+   mask_significant = amp_peak_amplitudes >= amplitude_threshold
    amp_peak_amplitudes = amp_peak_amplitudes[mask_significant]
    amp_peak_frequencies = amp_peak_frequencies[mask_significant]
-   
+
    # Sort by descending amplitude
    sorted_indices_peak_amp = np.argsort(amp_peak_amplitudes)[::-1]
    amp_peak_amplitudes_sorted = amp_peak_amplitudes[sorted_indices_peak_amp]
@@ -223,7 +198,8 @@ else:
    period_sorted = 1 / amp_peak_frequencies_sorted / 3600
    amplitude_sorted = amp_peak_amplitudes_sorted
 
-   print(f"Energy threshold: {energy_threshold:.4e}, Significant peaks: {len(amp_peak_amplitudes)}")
+   print(f"Amplitude threshold: {amplitude_threshold:.4e}, Significant peaks: {len(amp_peak_amplitudes)}")
+
 
 final_periods = []
 final_amplitudes = []
@@ -276,7 +252,7 @@ if flag_T_order == 1:
 # Time array for SSH plot (convert to hours)
 ssh_time = np.arange(0, spt_len * dt, dt) / 3600  
 
-# Select the main modes based on amplitude
+# Now select the main modes based on amplitude
 n_valid = min(len(amplitudes), len(freq_positive))  # Ensure valid index range
 top_indices_amp = np.argpartition(amplitudes[:n_valid], -n_modes)[-n_modes:]  # Select indices of top amplitudes
 sorted_indices_amp = np.argsort(amplitudes[top_indices_amp])[::-1]  # Sort by descending amplitude
@@ -300,29 +276,31 @@ plt.grid()
 plt.legend(loc='upper right')
 plt.savefig(work_dir+f'ssh_{lat_idx}_{lon_idx}_{exp}.png')
 
-# PLOT POWER SPECTRUM
+# PLOT AMPLITUDE SPECTRA with and without log scale
+
+# PLOT LOG
 plt.figure(figsize=(27, 14))
 ax = plt.subplot(111)
 box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
-plt.title(f'Power Spectrum at lat='+str(lats)+' lon='+str(lons)+' '+Med_reg)
+plt.title(f'Modes amplitudes at lat='+str(lats)+' lon='+str(lons)+' '+Med_reg)
 
 # Mark the main modes based on peak finder
-mode_colors = plt.cm.rainbow(np.linspace(0, 1, n_modes)) 
-for i in range(0,n_modes): 
+mode_colors = plt.cm.rainbow(np.linspace(0, 1, n_modes)) #len(amp_peak_frequencies)))
+for i in range(0,n_modes): #len(amp_peak_frequencies)):
     try:
-       plt.axvline(amp_peak_period_sorted[i], color=mode_colors[i],linestyle='--',linewidth=4,label=f'Mode {i} (T={amp_peak_period_sorted[i]:.2f} h, E={amp_peak_amplitudes_sorted[i]:.3f} m2*s2)')
+       plt.axvline(amp_peak_period_sorted[i], color=mode_colors[i],linestyle='--',linewidth=4,label=f'Mode {i} (T={amp_peak_period_sorted[i]:.2f} h, Amp={amp_peak_amplitudes_sorted[i]:.3f} m)')
        #plt.text(1/amp_peak_frequencies_sorted[i]/3600, plt.ylim()[0] - 0.1, f'{1/amp_peak_frequencies_sorted[i]/3600}', ha='center', va='top')
     except:
        print ('Nan')
 f_Nyq=dt*2/3600
-plt.loglog(periods[periods>f_Nyq], amplitudes[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='navy', label='Modes Energy')
+plt.loglog(periods[periods>f_Nyq], amplitudes[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='black', label='Modes Amplitudes')
 if flag_smooth == 'true':
-   plt.loglog(periods[periods>f_Nyq], amp_smooth[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Energy')
+   plt.loglog(periods[periods>f_Nyq], amp_smooth[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Amplitudes')
 elif flag_smooth == 'plot':
-   plt.loglog(periods[periods>f_Nyq], amp_smooth_2plot[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Energy')
+   plt.loglog(periods[periods>f_Nyq], amp_smooth_2plot[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Amplitudes')
 plt.xlabel('Period (h)')
-plt.ylabel('Power Spectrum (m2*s2)')
+plt.ylabel('Mode Amplitude (m)')
 plt.xlim(th_filter-1,dt*1/3600)
 plt.ylim(0.0000001,0.5)
 plt.text(24,plt.ylim()[0],'24', ha='center', va='top')
@@ -331,12 +309,12 @@ plt.text(6,plt.ylim()[0],'6', ha='center', va='top')
 plt.grid()
 plt.legend(loc='upper right') 
 
-# Add the table
+# Add the table below the plot
 table_data = []
 for i in range(n_modes):
-    table_data.append([f'Mode {i}', f'{amp_peak_period_sorted[i]:.2f} h', f'{amp_peak_amplitudes_sorted[i]:.3f} m2*s2'])
+    table_data.append([f'Mode {i}', f'{amp_peak_period_sorted[i]:.2f} h', f'{amp_peak_amplitudes_sorted[i]:.3f} m'])
 
-col_labels = ['Mode', 'Period (h)', 'Energy (m2*s2)']
+col_labels = ['Mode', 'Period (h)', 'Amplitude (m)']
 
 table_ax = plt.table(cellText=table_data,
                      colLabels=col_labels,
@@ -349,41 +327,41 @@ table_ax.scale(1.2, 1.2)
 
 for i, label in enumerate(col_labels):
     cell = table_ax.get_celld()[(0, i)]  
-    cell.set_facecolor('#d3d3d3')  
-    cell.set_text_props(weight='bold')
+    cell.set_facecolor('#d3d3d3')
+    cell.set_text_props(weight='bold')  
     
 for key, cell in table_ax.get_celld().items():
     cell.set_height(0.2)  
     #cell.set_fontsize(16)
 
 plt.tight_layout()
-plt.savefig(work_dir+f'pow_{lat_idx}_{lon_idx}_{exp}.png')
+plt.savefig(work_dir+f'amp_{lat_idx}_{lon_idx}_{exp}.png')
 
-# Amp no log plot
+# PLOT NO LOG
 plt.figure(figsize=(27, 14))
 ax = plt.subplot(111)
 box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
-plt.title(f'Power Spectrum at lat='+str(lats)+' lon='+str(lons)+' '+Med_reg)
+plt.title(f'Modes amplitudes at lat='+str(lats)+' lon='+str(lons))
 
 # Mark the main modes based on peak finder
 mode_colors = plt.cm.rainbow(np.linspace(0, 1, n_modes)) 
 for i in range(0,n_modes): 
     try:
-       plt.axvline(amp_peak_period_sorted[i], color=mode_colors[i],linestyle='--',linewidth=4,label=f'Mode {i} (T={amp_peak_period_sorted[i]:.2f} h, E={amp_peak_amplitudes_sorted[i]:.3f} m2*s2)')
+       plt.axvline(amp_peak_period_sorted[i], color=mode_colors[i],linestyle='--',linewidth=4,label=f'Mode {i} (T={amp_peak_period_sorted[i]:.2f} h, Amp={amp_peak_amplitudes_sorted[i]:.3f} m)')
        #plt.text(1/amp_peak_frequencies_sorted[i]/3600, plt.ylim()[0] - 0.1, f'{1/amp_peak_frequencies_sorted[i]/3600}', ha='center', va='top')
     except:
        print ('Nan')
 f_Nyq=dt*2/3600
-plt.loglog(periods[periods>f_Nyq], amplitudes[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='navy', label='Modes Energy')
+plt.loglog(periods[periods>f_Nyq], amplitudes[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='black', label='Modes Amplitudes')
 if flag_smooth == 'true':
-   plt.loglog(periods[periods>f_Nyq], amp_smooth[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Energy')
+   plt.loglog(periods[periods>f_Nyq], amp_smooth[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Amplitudes')
 elif flag_smooth == 'plot':
-   plt.loglog(periods[periods>f_Nyq], amp_smooth_2plot[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Energy')
+   plt.loglog(periods[periods>f_Nyq], amp_smooth_2plot[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Amplitudes')
 plt.xlabel('Period (h)')
-plt.ylabel('Power Spectrum (m2*s2)')
+plt.ylabel('Mode Amplitude (m)')
 plt.xlim(th_filter-1,dt*1/3600)
-plt.ylim(0.00000001,0.04)
+plt.ylim(0.00000001,0.025)
 
 plt.text(24,plt.ylim()[0],'24', ha='center', va='top')
 plt.text(12,plt.ylim()[0],'12', ha='center', va='top')
@@ -393,12 +371,12 @@ plt.grid()
 plt.yscale('linear')
 plt.legend(loc='upper right') 
 
-# Add the table
+# Add the table below the plot
 table_data = []
 for i in range(n_modes):
-    table_data.append([f'Mode {i}', f'{amp_peak_period_sorted[i]:.2f} h', f'{amp_peak_amplitudes_sorted[i]:.3f} m2*s2'])
+    table_data.append([f'Mode {i}', f'{amp_peak_period_sorted[i]:.2f} h', f'{amp_peak_amplitudes_sorted[i]:.3f} m'])
 
-col_labels = ['Mode', 'Period (h)', 'Energy (m2*s2)']
+col_labels = ['Mode', 'Period (h)', 'Amplitude (m)']
 
 table_ax = plt.table(cellText=table_data,
                      colLabels=col_labels,
@@ -419,5 +397,5 @@ for key, cell in table_ax.get_celld().items():
     #cell.set_fontsize(16)
 
 plt.tight_layout()
-plt.savefig(work_dir+f'pow_nolog_{lat_idx}_{lon_idx}_{exp}.png')
+plt.savefig(work_dir+f'amp_nolog_{lat_idx}_{lon_idx}_{exp}.png')
 

@@ -12,63 +12,20 @@ from matplotlib.ticker import FuncFormatter
 from scipy.signal import detrend
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks
+import point_ini
 mpl.use('Agg')
 
 ########
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m/plots_all/'
-
-# Inputs and outputs
-start_date = "20150104" 
-end_date = "20150204" 
-# BF
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB_2/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB/EXP00_BF/20*/model/medfs-eas9_1ts_20*_2D_grid_T.nc"))
-# NO BF
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# BF f
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_3NT_AB/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# P cost
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_5NT_P/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# P cost+f
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_4NT_P/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# Zonal wind 20 m/s
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# Meridional wind 20 m/s
-all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-# Atm Pressure
-#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
 
 # Exp tag
 Med_reg=str(sys.argv[3])
-exp='WIND_M_1h_'+Med_reg
+exp=tag+Med_reg
 
 # Lat and lon indexes
 lat_idx = int(sys.argv[2]) 
 lon_idx = int(sys.argv[1]) 
 
-# Model time step in seconds
-dt = 3600 #90 60*60
-
-# Number of modes to analyze (n_modes = 'auto' if you want to analyze all the modes)
-n_modes = 'auto'
-
-# Flag and threshold [h] for filtering the spectrum the threshold is also used as plot minimum 
-flag_filter='true'
-th_filter=40
-
-# Flag for Gaussian smoothing of the spectrum: true, false or plot (to use the original spt but add the plot of the smoothed spt)
-flag_smooth='false'
-sigma=15 
-
-# To order by period instead of by amplitude set flag_T_order = 1
-flag_T_order = 1
-
-# Filter out modes with low energy, e.g. 0.10 means that all the modes with energy<10% of the total energy are rm (to avoid the filtering set energy_threshold_ratio = 0)
-energy_threshold_ratio = 0.002
-
-# Flag: use segmented (averaged) spectrum or full time series
-flag_segmented_spectrum = True  # False to disable and use full spectrum
-segment_len_days = 5  # length of each segment (in days) if segmented spectrum is used
+all_files=sorted(glob.glob(file_template))
 
 ###################
 # Select the period

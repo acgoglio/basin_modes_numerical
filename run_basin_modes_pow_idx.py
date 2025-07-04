@@ -27,14 +27,16 @@ max_lat = int(sys.argv[4])
 box_idx = str(sys.argv[5])
 
 # Workdir, otufile template and otfile name
-work_dir='/work/cmcc/ag15419/basin_modes_20not/'
+work_dir='/work/cmcc/ag15419/basin_modes_num/'
 infile_amppha='/work/cmcc/ag15419/basin_modes/basin_modes_ini.nc'
 outfile=work_dir+'basin_modes_pow_'+box_idx+'.nc'
 
 # Infiles
-start_date = "20150121"
-end_date = "20150221"
-all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB_2/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
+start_date = "20150110"
+end_date = "20150130"
+#all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB_2/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
+# Zonal wind 20 m/s
+all_files = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
 mesh_mask = "/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc"
 
 # Model time step in seconds
@@ -76,30 +78,80 @@ mesh = mesh_nemo.variables['tmask'][0,0,:,:]
 
 ########################
 # Compute and write values in the netCDF file
+#modes_outfile = nc.Dataset(outfile, 'a')
+#
+## Call the function for each point in the Med
+#for lon_idx in range (min_lon,max_lon): #(300,len(nav_lon)):
+#    for lat_idx in range (min_lat,max_lat): # (0,len(nav_lat)):
+#
+#        # If is sea-point:
+#        if mesh[lat_idx, lon_idx]==1:
+#
+#           # Extract the time-series and Call the function
+#           ssh_ts_point = ssh_ts_all[:, lat_idx, lon_idx].values
+#           pow_peak_periods_main, pow_peak_amplitudes_main = f_point_powspt.pow_main_modes(lat_idx, lon_idx, ssh_ts_point, dt)
+#
+#           for i in range(len(amp_peak_periods_main)):
+#               try:
+#                  modes_outfile.variables[f'm{i}_Amp'][lat_idx, lon_idx] = pow_peak_amplitudes_main[i]
+#                  modes_outfile.variables[f'm{i}_T'][lat_idx, lon_idx] = pow_peak_periods_main[i]
+#               except:
+#                  modes_outfile.variables[f'm{i}_Amp'][lat_idx, lon_idx] = np.nan
+#                  modes_outfile.variables[f'm{i}_T'][lat_idx, lon_idx] = np.nan
+#
+#        # If land point
+#        else:
+#           for i in range(len(amp_peak_periods_main)):
+#                  modes_outfile.variables[f'm{i}_Amp'][lat_idx, lon_idx] = np.nan
+#                  modes_outfile.variables[f'm{i}_T'][lat_idx, lon_idx] = np.nan 
+#modes_outfile.close()
+
+# Compute and write values in the netCDF file 
 modes_outfile = nc.Dataset(outfile, 'a')
 
-# Call the function for each point in the Med
-for lon_idx in range (min_lon,max_lon): #(300,len(nav_lon)):
-    for lat_idx in range (min_lat,max_lat): # (0,len(nav_lat)):
+# Fields in the ini file
+initial_modes = 8
 
+#Call the function for each point in the Med
+for lon_idx in range(min_lon, max_lon):
+    for lat_idx in range(min_lat, max_lat):
         # If is sea-point:
-        if mesh[lat_idx, lon_idx]==1:
+        if mesh[lat_idx, lon_idx] == 1:
+            # Extract the time-series and Call the function
+            ssh_ts_point = ssh_ts_all[:, lat_idx, lon_idx].values
+            pow_peak_periods_main, pow_peak_amplitudes_main = f_point_powspt.pow_main_modes(
+                lat_idx, lon_idx, ssh_ts_point, dt
+            )
 
-           # Extract the time-series and Call the function
-           ssh_ts_point = ssh_ts_all[:, lat_idx, lon_idx].values
-           pow_peak_periods_main, pow_peak_amplitudes_main = f_point_powspt.pow_main_modes(lat_idx, lon_idx, ssh_ts_point, dt)
+            nmodes_here = len(pow_peak_periods_main)
 
-           for i in range(8):
-               try:
-                  modes_outfile.variables[f'm{i}_Amp'][lat_idx, lon_idx] = pow_peak_amplitudes_main[i]
-                  modes_outfile.variables[f'm{i}_T'][lat_idx, lon_idx] = pow_peak_periods_main[i]
-               except:
-                  modes_outfile.variables[f'm{i}_Amp'][lat_idx, lon_idx] = np.nan
-                  modes_outfile.variables[f'm{i}_T'][lat_idx, lon_idx] = np.nan
+            for i in range(nmodes_here):
+                # If num field > 8 built it
+                pow_varname = f'm{i}_Amp'
+                per_varname = f'm{i}_T'
+
+                if pow_varname not in modes_outfile.variables:
+                    modes_outfile.createVariable(pow_varname, 'f4', ('y', 'x'), fill_value=np.nan)
+                if per_varname not in modes_outfile.variables:
+                    modes_outfile.createVariable(per_varname, 'f4', ('y', 'x'), fill_value=np.nan)
+
+                # Write the value
+                modes_outfile.variables[pow_varname][lat_idx, lon_idx] = pow_peak_amplitudes_main[i]
+                modes_outfile.variables[per_varname][lat_idx, lon_idx] = pow_peak_periods_main[i]
+
+            # Fill extra fields with nan
+            for i in range(nmodes_here, initial_modes):
+                pow_varname = f'm{i}_Amp'
+                per_varname = f'm{i}_T'
+
+                if pow_varname in modes_outfile.variables:
+                    modes_outfile.variables[pow_varname][lat_idx, lon_idx] = np.nan
+                if per_varname in modes_outfile.variables:
+                    modes_outfile.variables[per_varname][lat_idx, lon_idx] = np.nan
 
         # If land point
         else:
-           for i in range(8):
-                  modes_outfile.variables[f'm{i}_Amp'][lat_idx, lon_idx] = np.nan
-                  modes_outfile.variables[f'm{i}_T'][lat_idx, lon_idx] = np.nan
+            for varname in modes_outfile.variables:
+                modes_outfile.variables[varname][:] = np.nan
+
 modes_outfile.close()

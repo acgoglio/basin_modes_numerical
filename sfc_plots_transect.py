@@ -25,14 +25,14 @@ mpl.use('Agg')
 exp_name      = "Med Modes"
 NEMO_GRID     = "/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc"
 var           = "sossheig"
-infiles       = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_hmslp_2NT_AB_2/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-outfile_temp  = "/work/cmcc/ag15419/basin_modes_20not/plots_area/ssh"
+infiles       = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
+outfile_temp  = "/work/cmcc/ag15419/basin_modes_num_atmp/plots_area/ssh"
 minV          = "-0.1"
 maxV          = "0.1"
 thV           = "-1000"
 cmap          = "seismic"
-inidate       = "20150121"
-enddate       = "20150221"
+inidate       = "20150110"
+enddate       = "20150130"
 var_name      = "sossheig"
 unit          = "m"
 

@@ -9,7 +9,7 @@ from PIL import Image, ImageChops
 mpl.use("Agg")  # For non-interactive backend
 
 # Input/output directories
-base_dir = "/work/cmcc/ag15419/basin_modes"
+base_dir = "/work/cmcc/ag15419/basin_modes_num/"
 amp_dir = os.path.join(base_dir, "mode_plots_amp")
 pow_dir = os.path.join(base_dir, "mode_plots_pow")
 out_dir = os.path.join(base_dir, "mode_plots_all")
