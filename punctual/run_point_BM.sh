@@ -30,3 +30,6 @@ while read LINE; do
     bsub -n 1 -q ${QUEUE} -P ${QPRJ} -M ${QMEM} -o ${workdir}/out_ampspt -e ${workdir}/err_ampspt python point_ampspt_diag.py $LINE 
  fi 
 done < ${coo_file}
+
+# Plot the map with the selected points:
+bsub -n 1 -q ${QUEUE} -P ${QPRJ} -M ${QMEM} -o ${workdir}/out_pplot -e ${workdir}/err_pplot python bathy_point_map.py
