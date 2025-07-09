@@ -62,9 +62,17 @@ if [[ ${flag_merge_modes} == 1 ]]; then
    bsub -n 1 -q ${QUEUE_S} -P ${QPRJ} -M ${QMEM} -o ${work_dir}/out_mergepow -e ${work_dir}/err_mergepow python merge_pow_idx.py
 fi
 
-# 3) Run the diagnostic
+# 3) Compute the modes
 if [[ ${flag_modes_analysis} == 1 ]]; then
-   echo "I am going to analyze the modes.."
+   echo "I am going to extract the modes.."
    bsub -n 1 -q ${QUEUE_S} -P ${QPRJ} -M ${QMEM} -o ${work_dir}/out_tabamp -e ${work_dir}/err_tabamp python mode_period_tab_amp.py
    bsub -n 1 -q ${QUEUE_S} -P ${QPRJ} -M ${QMEM} -o ${work_dir}/out_tabpow -e ${work_dir}/err_tabpow python mode_period_tab_pow.py
 fi 
+
+# 4) Plot the modes amplitudes
+if [[ ${flag_modes_plot} == 1 ]]; then
+   echo "I am going to plot the modes.."
+bsub -n 1 -q ${QUEUE_S} -P ${QPRJ} -M ${QMEM} -o ${work_dir}/out_plotamp -e ${work_dir}/err_plotamp python mode_period_plot_ampval.py
+bsub -n 1 -q ${QUEUE_S} -P ${QPRJ} -M ${QMEM} -o ${work_dir}/out_plotpow -e ${work_dir}/err_plotpow python mode_period_plot_powval.py
+
+fi

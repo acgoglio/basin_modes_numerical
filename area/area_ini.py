@@ -1,12 +1,13 @@
 # Initialization file for the med modes areal procedure
 
 # Work directory
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m/area/'
+work_dir='/work/cmcc/ag15419/basin_modes_num_wind_z/area/'
 
 # Flags ( 0->NO; 1->YES):
-flag_compute_modes=0
+flag_compute_modes=1
 flag_merge_modes=0
-flag_modes_analysis=1
+flag_modes_analysis=0
+flag_modes_plot=0
 
 # Period to be analyzed (date format:YYYYMMDD)
 start_date='20150110'
@@ -14,9 +15,9 @@ end_date='20150130'
 
 # Input path/name template (use * character for the dates in the string)
 # Relaxation after perturbation by Zonal wind 30 m/s
-#file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_z/EXP00_rel40/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
+file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 # Relaxation after perturbation by Meridional wind 40 m/s
-file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
+#file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 # Relaxation after perturbation by atmospheric pressure (Pref + 100 hPa)
 #file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 
@@ -25,6 +26,8 @@ dt=3600
 
 # Mesh mask
 mesh_mask='/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc'
+# Bathymetry
+bathy_meter='/work/cmcc/ag15419/VAA_paper/DATA0/bathy_meter.nc'
 
 ######################################################
 

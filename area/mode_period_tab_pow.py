@@ -4,7 +4,7 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import os
 import matplotlib as mpl
-from area_ini import *
+from area_ini2 import *
 mpl.use("Agg")  # For non-interactive backend
 
 # === Parameters ===
@@ -41,7 +41,9 @@ rounded_periods = rounded_periods[rounded_periods > 0]
 df_all = rounded_periods.value_counts().reset_index()
 df_all.columns = ["Period", "Count"]
 df_all["%"] = (df_all["Count"] / sea_gp_num * 100).round(2)
-df_all = df_all.sort_values("Count", ascending=False).reset_index(drop=True)
+#df_all = df_all.sort_values("Count", ascending=False).reset_index(drop=True)
+df_all = df_all.sort_values("Period", ascending=False).reset_index(drop=True)
+print ('Order by period..')
 df_all.to_csv(os.path.join(indir, "periods_all_pow.csv"), index=False)
 print("Saved: periods_all_pow.csv")
 
@@ -95,7 +97,9 @@ if flag_var_unc == 0:
 
     df_greedy = pd.DataFrame(greedy_groups, columns=["Grouped_Period", "Count"])
     df_greedy["%"] = (df_greedy["Count"] / sea_gp_num * 100).round(2)
-    df_greedy = df_greedy.sort_values("Count", ascending=False).reset_index(drop=True)
+    #df_greedy = df_greedy.sort_values("Count", ascending=False).reset_index(drop=True)
+    df_greedy = df_greedy.sort_values("Grouped_Period", ascending=False).reset_index(drop=True)
+    print ('Order by period..')
     df_greedy.to_csv(os.path.join(indir, "periods_grouped_pow.csv"), index=False)
     print("Saved: periods_grouped_pow.csv (fixed tolerance)")
 
@@ -136,7 +140,8 @@ if flag_var_unc == 0:
 
 elif flag_var_unc == 1:
     # Variable tolerance based on spectral resolution
-    delta_f = 1.39e-3  # cph
+    segment_len_hours = segment_len_days * 24
+    delta_f = 1 / segment_len_hours  # Spectral resolution in cph
     remaining = rounded_periods.copy()
     greedy_groups = []
     tolerances_list = []
@@ -148,7 +153,7 @@ elif flag_var_unc == 1:
 
     while not remaining.empty:
         mode = remaining.mode()[0]
-        tolerance = (mode ** 2) * delta_f
+        tolerance = (mode ** 2) * delta_f #/ 2
         tolerance = round_to_1_sigfig(tolerance)
         group = remaining[np.abs(remaining - mode) <= tolerance]
         if len(group) == 0:
@@ -162,7 +167,9 @@ elif flag_var_unc == 1:
     df_greedy = pd.DataFrame(greedy_groups, columns=["Grouped_Period", "Count"])
     df_greedy["Tolerance"] = tolerances_list
     df_greedy["Percentage"] = df_greedy["Count"] / sea_gp_num * 100
-    df_greedy = df_greedy.sort_values("Count", ascending=False).reset_index(drop=True)
+    #df_greedy = df_greedy.sort_values("Count", ascending=False).reset_index(drop=True)
+    df_greedy = df_greedy.sort_values("Grouped_Period", ascending=False).reset_index(drop=True)
+    print ('Order by period..')
     df_greedy.to_csv(os.path.join(indir, "periods_grouped_pow.csv"), index=False)
     print("Saved: periods_grouped_pow.csv (variable tolerance)")
 
