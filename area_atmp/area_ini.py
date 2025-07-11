@@ -3,7 +3,7 @@
 # Work directory
 #work_dir='/work/cmcc/ag15419/basin_modes_num_wind_z/area/'
 #work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m/area/'
-work_dir='/work/cmcc/ag15419/basin_modes_num_atmp_long_lw20/area/'
+work_dir='/work/cmcc/ag15419/basin_modes_num_atmp_long_lw10/area/'
 
 # Flags ( 0->NO; 1->YES):
 flag_compute_modes=1
@@ -47,7 +47,7 @@ n_modes='auto'
 
 # Flag: use segmented (averaged) spectrum or full time series
 flag_segmented_spectrum=True  # False to disable and use full spectrum
-segment_len_days=20  # length of each segment (in days) if segmented spectrum is used
+segment_len_days=10  # length of each segment (in days) if segmented spectrum is used
 
 # To order by period instead of by amplitude set flag_T_order = 1
 flag_T_order=1
