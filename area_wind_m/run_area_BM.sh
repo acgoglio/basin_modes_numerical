@@ -21,6 +21,9 @@ QUEUE_S="s_short"
 QMEM="100G"
 QPRJ="0723"
 
+# 0) Cp ini file in workdir
+cp -vf $(pwd)/area_ini.py ${work_dir}/
+
 # 1) Define and Analyze 27 sub-domains
 if [[ ${flag_compute_modes} == 1 ]]; then
    echo "I am going to compute the modes on 27 sub-domains.."   

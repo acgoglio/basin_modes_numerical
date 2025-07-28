@@ -26,6 +26,7 @@ lat_idx = int(sys.argv[2])
 lon_idx = int(sys.argv[1]) 
 
 all_files=sorted(glob.glob(file_template))
+print ('all_files',all_files)
 
 ###################
 # Select the period

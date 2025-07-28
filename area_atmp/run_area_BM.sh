@@ -21,6 +21,9 @@ QUEUE_S="s_short"
 QMEM="100G"
 QPRJ="0723"
 
+# 0) Cp ini file in workdir
+cp -vf $(pwd)/area_ini.py ${work_dir}/
+
 # 1) Define and Analyze 27 sub-domains
 if [[ ${flag_compute_modes} == 1 ]]; then
    echo "I am going to compute the modes on 27 sub-domains.."   
@@ -47,7 +50,6 @@ if [[ ${flag_compute_modes} == 1 ]]; then
        min_lat=${min_lat_list[$i]}
        max_lat=${max_lat_list[$i]}
        box_idx=$((i + 1))
-   
        echo "Running box $box_idx: lon $min_lon-$max_lon, lat $min_lat-$max_lat"
    
        bsub -n 1 -q ${QUEUE} -P ${QPRJ} -M ${QMEM} -o ${work_dir}/out_ampAspt_${box_idx} -e ${work_dir}/err_ampAspt_${box_idx} python run_basin_modes_amp_idx.py $min_lon $max_lon $min_lat $max_lat $box_idx

@@ -1,24 +1,24 @@
 # Initialization file for the med modes punctual procedure
 
 # Work directory
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_z/plots/'
+work_dir="/work/cmcc/ag15419/basin_modes_num_atmp_long_lw10/point/"
 
 # Period to be analyzed (date format:YYYYMMDD)
-start_date="20150110"
-end_date="20150230"
+start_date="20150104"
+end_date="20150203"
 
 # Input path/name template (use * character for the dates in the string)
 # Relaxation after perturbation by Zonal wind 30 m/s
-file_template="/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
+#file_template="/work/cmcc/ag15419/exp/EAS9BT_med-modes_wind_z/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
 # Relaxation after perturbation by Meridional wind 40 m/s
-#file_template="/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
+#file_template="/work/cmcc/ag15419/exp/EAS9BT_med-modes_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
 # Relaxation after perturbation by atmospheric pressure (Pref + 100 hPa)
-#file_template="/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
+file_template="/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
 
 # Exp tag
-tag='WIND_Z_1h_'
+tag="atmp_"
 
-# SSH time-serie frequency in seconds
+# SSH time-serie frequency in seconds (e.g. for hourly ts 3600)
 dt=3600 
 
 # Bathymetry
@@ -50,7 +50,7 @@ energy_threshold_ratio=0.002
 
 # Flag: use segmented (averaged) spectrum or full time series
 flag_segmented_spectrum=True  # False to disable and use full spectrum
-segment_len_days=5  # length of each segment (in days) if segmented spectrum is used
+segment_len_days=10  # length of each segment (in days) if segmented spectrum is used
 
 # Coordinate file (list of points to be analyzed)
 coo_file='idx_pt.coo'

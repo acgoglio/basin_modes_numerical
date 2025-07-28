@@ -2,14 +2,14 @@
 
 # Work directory
 #work_dir='/work/cmcc/ag15419/basin_modes_num_wind_z_long/area/'
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m_long/area/'
+work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m/area/'
 #work_dir='/work/cmcc/ag15419/basin_modes_num_atmp_long/area/'
 
 # Flags ( 0->NO; 1->YES):
-flag_compute_modes=1
+flag_compute_modes=0
 flag_merge_modes=0
 flag_modes_analysis=0
-flag_modes_plot=0
+flag_modes_plot=1
 
 # Period to be analyzed (date format:YYYYMMDD)
 start_date='20150105'
@@ -19,7 +19,7 @@ end_date='20150203'
 # Relaxation after perturbation by Zonal wind 30 m/s
 #file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 # Relaxation after perturbation by Meridional wind 40 m/s
-file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
+file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_wind_m/EXP00_rel40m/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 # Relaxation after perturbation by atmospheric pressure (Pref + 100 hPa)
 #file_template='/work/cmcc/ag15419/exp/fix_mfseas9_longrun_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 
@@ -47,11 +47,11 @@ n_modes='auto'
 
 # Flag: use segmented (averaged) spectrum or full time series
 flag_segmented_spectrum=True  # False to disable and use full spectrum
-segment_len_days=5  # length of each segment (in days) if segmented spectrum is used
+segment_len_days=10  # length of each segment (in days) if segmented spectrum is used
 
 # To order by period instead of by amplitude set flag_T_order = 1
 flag_T_order=1
 
 # Template for output file
-infile_amppha='/work/cmcc/ag15419/basin_modes/basin_modes_ini.nc'
+infile_amppha='/data/cmcc/ag15419/basin_modes/basin_modes_ini.nc'
 

@@ -22,17 +22,17 @@ warnings.filterwarnings("ignore")
 mpl.use('Agg')
 
 ############################
-exp_name      = "Med Modes excited by zonal wind forcing"
+exp_name      = "Med Modes excited by atm pressure"
 NEMO_GRID     = "/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc"
 var           = "sossheig"
-infiles       = sorted(glob.glob("/work/cmcc/ag15419/exp/fix_mfseas9_longrun_wind/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
-outfile_temp  = "/work/cmcc/ag15419/basin_modes_num_wind_z/ssh/ssh_"
-minV          = "-0.1"
-maxV          = "0.1"
+infiles       = sorted(glob.glob("/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"))
+outfile_temp  = "/work/cmcc/ag15419/basin_modes_num_atmp_long_lw10/ssh/ssh_"
+minV          = "-0.5"
+maxV          = "0.5"
 thV           = "-1000"
 cmap          = "seismic"
-inidate       = "20150110"
-enddate       = "20150130"
+inidate       = "20150105"
+enddate       = "20150107"
 var_name      = "sossheig"
 unit          = "m"
 
@@ -97,7 +97,7 @@ for idx_time in range(0, hours):
 
     # Prepare color palette
     try:
-        step = (float(maxV) - float(minV)) / 50
+        step = (float(maxV) - float(minV)) / 100
         pa = np.arange(float(minV), float(maxV), step)
     except:
         print("WARNING: something wrong with this field.. I am fixing -100,100 as min max palette values")
