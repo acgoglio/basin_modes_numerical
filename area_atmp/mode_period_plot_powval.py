@@ -7,7 +7,9 @@ import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 import netCDF4 as ncdf
 from matplotlib.colors import LogNorm
+import shutil
 from area_ini import *
+
 
 mpl.use("Agg")  # For non-interactive backend
 
@@ -41,8 +43,8 @@ try:
     group_centers = grouped_df["Grouped_Period"].values
     tolerance = grouped_df["Tolerance"].values
 except:
-    group_centers = grouped_df["Period"].values
-    tolerance = np.full(len(group_centers), 0.4)
+    group_centers = grouped_df["Grouped_Period"].values
+    tolerance = np.full(len(group_centers), fixed_uncertainty)
 
 # --- Load grid and mask ---
 nc_nemogrid = ncdf.Dataset(mesh_mask_file)
@@ -180,21 +182,35 @@ for idx_gp, gp in enumerate(group_centers):
     # Rel energy
     plt.figure(figsize=(10, 4))
     all_pow_vals.append(pow_field)
-    pow_percent = pow_field / np.nanmax(pow_field) * 100
+    # Normalize to the max or to the 99th perc
+    #pow_percent = pow_field / np.nanmax(pow_field) * 100
+    pow_percent = pow_field / np.nanpercentile(pow_field, 99) * 100
     masked_pow_pct = np.ma.masked_invalid(pow_percent)
     cmap_pow_pct = mpl.cm.get_cmap("gist_stern_r")
     cmap_pow_pct = truncate_colormap(cmap_pow_pct, 0.05, 0.95)
     cmap_pow_pct.set_bad("white")
 
-    im = plt.contourf(nav_lon, nav_lat, masked_pow_pct, levels=np.linspace(0, 100, 41), cmap=cmap_pow_pct)
+    # Handle values > the 99th perc
+    clipped_masked_pow_pct = np.clip(masked_pow_pct, 0, 100)
+    # Plot
+    im = plt.contourf(nav_lon, nav_lat, clipped_masked_pow_pct, levels=np.linspace(0, 100, 41), cmap=cmap_pow_pct)
     plt.colorbar(im, label="Energy (% of max)")
     plt.contour(nav_lon, nav_lat, masked_pow_pct, levels=[0.00], colors="magenta", linewidths=1.0)
     plt.contourf(nav_lon, nav_lat, tmask, levels=[-1000, 0.05], colors="gray")
     plt.contour(nav_lon, nav_lat, tmask, levels=[0.05], colors="black", linewidths=0.8)
 
-    contour_levels = [100, 200, 300]
+    #Add % dashed contours
+    contour_levels_perc = np.arange(0, 101, 10)
+    valid_levels = [lev for lev in contour_levels_perc
+        if np.nanmin(masked_pow_pct) <= lev <= np.nanmax(masked_pow_pct)]
+    if valid_levels:
+        CS_perc = plt.contour(nav_lon, nav_lat, masked_pow_pct,
+            levels=valid_levels, colors='k', linestyles='dashed', linewidths=0.5)
+    plt.clabel(CS_perc, inline=True, fontsize=8, fmt='%d%%')
+
+    #contour_levels = [100, 200, 300]
     #plt.contour(nav_lon, nav_lat, bathy, levels=contour_levels, colors="black", linewidths=0.5, linestyles="dashed")
-    contour_levels = [400, 500]
+    #contour_levels = [400, 500]
     #plt.contour(nav_lon, nav_lat, bathy, levels=contour_levels, colors="black", linewidths=0.5, linestyles="dotted")
 
     plt.title(f"Energy for Mode with Period: {gp:.1f} h ± {uncertainty} h")
