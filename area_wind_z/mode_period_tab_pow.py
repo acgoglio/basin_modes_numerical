@@ -8,7 +8,6 @@ from area_ini import *
 mpl.use("Agg")  # For non-interactive backend
 
 # === Parameters ===
-flag_var_unc = 1         # 1 = variable uncertainty, 0 = fixed uncertainty
 sea_gp_num = 145023      # Total sea grid points
 
 # === Input directory and file ===
@@ -85,7 +84,7 @@ print("Saved: histogram with top 10 table (all values)")
 # === Grouping algorithm ===
 if flag_var_unc == 0:
     # Fixed tolerance grouping
-    tolerance = 0.4
+    tolerance = fixed_uncertainty
     remaining = rounded_periods.copy()
     greedy_groups = []
 
@@ -113,7 +112,7 @@ if flag_var_unc == 0:
     column_labels = ["Grouped Period (h)", "Frequency (grid points)", "Percentage (%)"]
 
     fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(10, 8), gridspec_kw={'height_ratios': [2.5, 1]})
-    ax1.bar(df_greedy["Grouped_Period"], df_greedy["Count"], width=0.4, color="tab:green", edgecolor="black")
+    ax1.bar(df_greedy["Grouped_Period"], df_greedy["Count"], width=fixed_uncertainty, color="tab:green", edgecolor="black")
     ax1.set_xlabel(f"Grouped Period (hours ±{tolerance}h)")
     ax1.set_ylabel("Frequency (grid points)")
     ax1.set_title("Grouped Mode Periods (Fixed Tolerance)")
@@ -153,7 +152,8 @@ elif flag_var_unc == 1:
 
     while not remaining.empty:
         mode = remaining.mode()[0]
-        tolerance = (mode ** 2) * delta_f #/ 2
+        tolerance = (mode ** 2) * delta_f  
+        tolerance = tolerance + extra_unc * tolerance
         tolerance = round_to_1_sigfig(tolerance)
         group = remaining[np.abs(remaining - mode) <= tolerance]
         if len(group) == 0:

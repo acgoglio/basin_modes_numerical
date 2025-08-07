@@ -205,7 +205,7 @@ for idx_gp, gp in enumerate(group_centers):
     if valid_levels:
         CS_perc = plt.contour(nav_lon, nav_lat, masked_amp_pct,
             levels=valid_levels, colors='k', linestyles='dashed', linewidths=0.5)
-    plt.clabel(CS_perc, inline=True, fontsize=8, fmt='%d%%')
+    plt.clabel(CS_perc, inline=True, fontsize=7, fmt='%d%%')
 
     #contour_levels = [100, 200, 300]
     #plt.contour(nav_lon, nav_lat, bathy, levels=contour_levels, colors="black", linewidths=0.5, linestyles="dashed")
