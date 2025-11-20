@@ -1,5 +1,7 @@
 import glob
 import sys
+import re
+import os
 import xarray as xr
 import netCDF4 as nc
 import numpy as np
@@ -29,14 +31,40 @@ all_files=sorted(glob.glob(file_template))
 print ('all_files',all_files)
 
 ###################
+
 # Select the period
+# Cylc archive structure:
+#infile = []
+#for f in all_files:
+#    print ('file',f)
+#    parts = f.split("/")
+#    file_date = parts[7] # 7 6  
+#    if start_date <= file_date <= end_date: 
+#            infile.append(f)
+# General archive structure:
+print("Num of in files:", len(all_files))
+if len(all_files) == 0:
+    print("WARNING: template file not found ", file_template)
+date_re = re.compile(r'(\d{8})')
 infile = []
+no_date_files = []
 for f in all_files:
-    print ('file',f)
-    parts = f.split("/")
-    file_date = parts[7] # 7 6  
-    if start_date <= file_date <= end_date: 
+    basename = os.path.basename(f)
+    m = date_re.search(basename)
+    if m:
+        file_date = m.group(1)
+        if start_date <= file_date <= end_date:
             infile.append(f)
+    else:
+        no_date_files.append(f)
+# Debug
+print("Selected files:", len(infile))
+if len(no_date_files) > 0:
+    print("This files do not have a date in the name..:")
+    for ff in no_date_files[:5]:
+        print("  ", ff)
+if len(infile) == 0:
+    print("WARNING: NO files range", start_date, "-", end_date)
 
 # Initialize SSH time series
 ssh_ts_all = []
@@ -85,18 +113,46 @@ if flag_segmented_spectrum:
 
     for i in range(num_segments):
         segment = time_series_clean[i * segment_len : (i + 1) * segment_len]
-        fft_segment = np.fft.fft(segment)
-        freq_segment = np.fft.fftfreq(len(segment), d=dt)
-        mask = freq_segment > 0
-        amp_segment = (np.abs(fft_segment[mask]) ** 2) / len(segment)
+
+
+        # Hanning 
+        if flag_hanning != 0:
+            hanning_window = np.hanning(len(segment))
+            segment_windowed = segment * hanning_window
+            segment_windowed /= hanning_window.mean()  # normalizzazione
+        else:
+            segment_windowed = segment
+
+        # FFT 
+        if flag_nfft != 0:
+            fft_segment = np.fft.fft(segment_windowed, n=N_fft)
+            freq_segment = np.fft.fftfreq(N_fft, d=dt)
+        else:
+            fft_segment = np.fft.fft(segment_windowed)
+            freq_segment = np.fft.fftfreq(len(segment_windowed), d=dt)
+
+        # Frequenze positive
+        N_used = len(fft_segment)
+        half_len = N_used // 2
+        freq_positive = freq_segment[:half_len]
+        fft_positive = fft_segment[:half_len]
+        mask = freq_positive > 0
+        freq_positive = freq_positive[mask]
+        fft_positive = fft_positive[mask]
+
+        # PSD e ampiezza
+        amp_segment = (2 / N_used) * np.abs(fft_positive)
         all_amplitudes.append(amp_segment)
 
-    # Average the spectra
+    # Media dei segmenti
     amplitudes = np.mean(all_amplitudes, axis=0)
-    # Select only positive frequencies 
-    freq_positive = freq_segment[mask]  # Same for all segments
-    # Compute Periods in hours
+
+    # Frequenze positive (uguali per tutti i segmenti)
+    freq_positive = freq_positive
+
+    # Periodi in ore (solo se dt in secondi)
     periods = 1 / freq_positive / 3600
+
 
 else:
     # Classical spectrum from full series
@@ -258,12 +314,21 @@ plt.grid()
 plt.legend(loc='upper right')
 plt.savefig(work_dir+f'ssh_{lat_idx}_{lon_idx}_{exp}.png')
 
+# Compute the inertial freq.
+Omega = 7.292115e-5  # rad/s
+phi = np.deg2rad(lats) # lat in rad
+f_c = 2 * Omega * np.sin(phi) # inertial freq.
+T_f = (2 * np.pi / f_c) / 3600 # inertial period
+
 # PLOT POWER SPECTRUM
 plt.figure(figsize=(27, 14))
 ax = plt.subplot(111)
 box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
 plt.title(f'Power Spectrum at lat='+str(lats)+' lon='+str(lons)+' '+Med_reg)
+
+# Plot the inertial freq.
+plt.axvline(T_f, color='black', linestyle='--', linewidth=3, label=f'Inertial period = {T_f:.1f} h') 
 
 # Mark the main modes based on peak finder
 mode_colors = plt.cm.rainbow(np.linspace(0, 1, n_modes)) 
@@ -320,9 +385,13 @@ plt.savefig(work_dir+f'pow_{lat_idx}_{lon_idx}_{exp}.png')
 # Amp no log plot
 plt.figure(figsize=(27, 14))
 ax = plt.subplot(111)
+plt.rcParams.update({'font.size': 20})
 box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
 plt.title(f'Power Spectrum at lat='+str(lats)+' lon='+str(lons)+' '+Med_reg)
+
+# Plot the inertial freq.
+#plt.axvline(T_f, color='black', linestyle='--', linewidth=3, label=f'Inertial period = {T_f:.1f} h')
 
 # Mark the main modes based on peak finder
 mode_colors = plt.cm.rainbow(np.linspace(0, 1, n_modes)) 
@@ -340,8 +409,8 @@ elif flag_smooth == 'plot':
    plt.loglog(periods[periods>f_Nyq], amp_smooth_2plot[periods>f_Nyq], marker='o', linestyle='-',linewidth=4,color='tab:green', label='Smoothed Modes Energy')
 plt.xlabel('Period (h)')
 plt.ylabel('Power Spectrum (m2*s2)')
-plt.xlim(th_filter-1,dt*1/3600)
-plt.ylim(0.00000001,0.04)
+plt.xlim(th_filter,dt*1/3600) #(th_filter-1,dt*1/3600)
+plt.ylim(0.00000001,0.1)
 
 plt.text(24,plt.ylim()[0],'24', ha='center', va='top')
 plt.text(12,plt.ylim()[0],'12', ha='center', va='top')

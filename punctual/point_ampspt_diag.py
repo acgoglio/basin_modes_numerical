@@ -1,5 +1,7 @@
 import glob
 import sys
+import re
+import os
 import xarray as xr
 import netCDF4 as nc
 import numpy as np
@@ -28,13 +30,38 @@ all_files=sorted(glob.glob(file_template))
 
 ###################
 # Select the period
+# Cylc archive structure:
+#infile = []
+#for f in all_files:
+#    print ('file',f)
+#    parts = f.split("/")
+#    file_date = parts[7] # 7 6  
+#    if start_date <= file_date <= end_date: 
+#            infile.append(f)
+# General archive structure:
+print("Num of in files:", len(all_files))
+if len(all_files) == 0:
+    print("WARNING: template file not found ", file_template)
+date_re = re.compile(r'(\d{8})')
 infile = []
+no_date_files = []
 for f in all_files:
-    print ('file',f)
-    parts = f.split("/")
-    file_date = parts[7] # 7 6  
-    if start_date <= file_date <= end_date: 
+    basename = os.path.basename(f)
+    m = date_re.search(basename)
+    if m:
+        file_date = m.group(1)
+        if start_date <= file_date <= end_date:
             infile.append(f)
+    else:
+        no_date_files.append(f)
+# Debug
+print("Selected files:", len(infile))
+if len(no_date_files) > 0:
+    print("This files do not have a date in the name..:")
+    for ff in no_date_files[:5]:
+        print("  ", ff)
+if len(infile) == 0:
+    print("WARNING: NO files range", start_date, "-", end_date)
 
 # Initialize SSH time series
 ssh_ts_all = []
@@ -85,11 +112,23 @@ if flag_segmented_spectrum:
     for i in range(num_segments):
         segment = time_series_clean[i * segment_len : (i + 1) * segment_len]
 
-        fft_segment = np.fft.fft(segment)
-        freq_segment = np.fft.fftfreq(segment_len, d=dt)
+        if flag_hanning != 0:
+            hanning_window = np.hanning(len(segment))
+            segment_windowed = segment * hanning_window
+            segment_windowed /= hanning_window.mean()  # normalizzazione
+        else:
+            segment_windowed = segment
+
+        if flag_nfft != 0:
+            fft_segment = np.fft.fft(segment_windowed, n=N_fft)
+            freq_segment = np.fft.fftfreq(N_fft, d=dt)
+        else:
+            fft_segment = np.fft.fft(segment_windowed)
+            freq_segment = np.fft.fftfreq(len(segment_windowed), d=dt)
 
         # Select only positive frequencies
-        half_len = segment_len // 2
+        N_used = len(fft_segment)
+        half_len = N_used // 2
         freq_positive = freq_segment[:half_len]
         fft_positive = fft_segment[:half_len]
         mask = freq_positive > 0
@@ -97,9 +136,10 @@ if flag_segmented_spectrum:
         fft_positive = fft_positive[mask]
 
         # Computr Power Spectral Density
-        spt_seg = (np.abs(fft_positive) ** 2) / segment_len
+        spt_seg = (np.abs(fft_positive)**2) / N_used
+
         # Calcola ampiezza spettrale corretta (fattore 2/N)
-        amp_seg = (2 / segment_len) * np.abs(fft_positive)
+        amp_seg = (2 / N_used) * np.abs(fft_positive)
 
         spt_segments.append(spt_seg)
         amp_segments.append(amp_seg)
@@ -280,6 +320,7 @@ plt.savefig(work_dir+f'ssh_{lat_idx}_{lon_idx}_{exp}.png')
 
 # PLOT LOG
 plt.figure(figsize=(27, 14))
+plt.rc('font', size=20)
 ax = plt.subplot(111)
 box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
@@ -339,6 +380,7 @@ plt.savefig(work_dir+f'amp_{lat_idx}_{lon_idx}_{exp}.png')
 
 # PLOT NO LOG
 plt.figure(figsize=(27, 14))
+plt.rc('font', size=24)
 ax = plt.subplot(111)
 box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
@@ -361,7 +403,8 @@ elif flag_smooth == 'plot':
 plt.xlabel('Period (h)')
 plt.ylabel('Mode Amplitude (m)')
 plt.xlim(th_filter-1,dt*1/3600)
-plt.ylim(0.00000001,0.025)
+#plt.ylim(0.00000001,0.025)
+plt.ylim(0.00000001,0.05)
 
 plt.text(24,plt.ylim()[0],'24', ha='center', va='top')
 plt.text(12,plt.ylim()[0],'12', ha='center', va='top')

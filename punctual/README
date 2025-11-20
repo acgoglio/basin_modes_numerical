@@ -6,3 +6,6 @@
 # 1) set point_ini.py file
 # 2) run run_point_BM.sh script 
 #
+# If you need to go from 1.5 min to 15 min: 
+#MM=01; for DD in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31; do SCDO seltimestep,$(seq 1 10 960 | paste -sd,) /work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp_nof/EXP00/2015${MM}${DD}/model/medfs-eas9_1ts_2015${MM}${DD}_2D_grid_T.nc /work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_g/input_files_15min/medfs-eas9_15m_2015${MM}${DD}_2D_grid_T.nc; echo ${DD}; done
+
