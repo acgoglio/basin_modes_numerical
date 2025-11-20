@@ -1,27 +1,24 @@
 # Initialization file for the med modes areal procedure
 
 # Work directory
-#work_dir='/work/cmcc/ag15419/basin_modes_num_atmp_long_vlth/area/'
-work_dir='/work/cmcc/ag15419/basin_modes_num_atmp_15/area/'
+work_dir='/work/cmcc/ag15419/basin_modes/basin_modes_num_atmp_long_lw10/area/'
 
 # Flags ( 0->NO; 1->YES):
 # Choose ONLY one option per run
-flag_compute_modes=1
+flag_compute_modes=0
 flag_merge_modes=0
 flag_modes_analysis=0
-flag_modes_plot=0
+flag_modes_plot=1
 
 # Period to be analyzed (date format:YYYYMMDD)
 start_date='20150105'
 end_date='20150203'
 
 # Input path/name template (use * character for the dates in the string)
-#file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
-file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_5ts_20*_2D_grid_T.nc'
+file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 
 # SSH time-serie frequency in seconds
-#dt=3600
-dt=900
+dt=3600
 
 # Mesh mask
 mesh_mask='/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc'
@@ -35,9 +32,9 @@ flag_filter='true'
 th_filter=40
 
 # Filter out modes with low amplitude, e.g. 0.10 means that all the modes with amplitude<10% of the total amplitude are rm (to avoid the filtering set amplitude_threshold_ratio = 0)
-amplitude_threshold_ratio=0.00000001
+amplitude_threshold_ratio=0.0001
 # Filter out modes with low energy, e.g. 0.10 means that all the modes with energy<10% of the total energy in the analized point are rm (to avoid the filtering set energy_threshold_ratio = 0)
-energy_threshold_ratio=0.00000001
+energy_threshold_ratio=0.0001
 
 # Number of modes to analyze (n_modes = 'auto' if you want to analyze all the modes)
 n_modes='auto'
