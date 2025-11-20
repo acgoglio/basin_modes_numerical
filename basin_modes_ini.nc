@@ -1,0 +1,1 @@
+/data/cmcc/ag15419/basin_modes/basin_modes_ini.nc
