@@ -1,7 +1,7 @@
 # Initialization file for the med modes areal procedure
 
 # Work directory
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_z_lth/area/'
+work_dir='/work/cmcc/ag15419/basin_modes/basin_modes_num_wind_z_lth/area/'
 
 # Flags ( 0->NO; 1->YES):
 flag_compute_modes=0

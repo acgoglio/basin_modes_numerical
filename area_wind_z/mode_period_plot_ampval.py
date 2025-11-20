@@ -134,19 +134,19 @@ for idx_gp, gp in enumerate(group_centers):
 
     # Presence 
     presence_mask = (~np.isnan(mode_field)).astype(int)
-    plt.figure(figsize=(10, 4))
+    #plt.figure(figsize=(10, 4))
     cmap_presence = mpl.colors.ListedColormap(["white", "tab:blue"])
     bounds = [0, 0.5, 1.5]
     norm = mpl.colors.BoundaryNorm(bounds, cmap_presence.N)
-    plt.contourf(nav_lon, nav_lat, presence_mask, levels=bounds, cmap=cmap_presence, norm=norm)
-    plt.contourf(nav_lon, nav_lat, tmask, levels=[-1000, 0.05], colors="gray")
-    plt.contour(nav_lon, nav_lat, tmask, levels=[0.05], colors="black", linewidths=0.8)
-    plt.xlabel("Longitude")
-    plt.ylabel("Latitude")
-    plt.xlim(-6, 36.3)
-    plt.ylim(30, 46)
+    #plt.contourf(nav_lon, nav_lat, presence_mask, levels=bounds, cmap=cmap_presence, norm=norm)
+    #plt.contourf(nav_lon, nav_lat, tmask, levels=[-1000, 0.05], colors="gray")
+    #plt.contour(nav_lon, nav_lat, tmask, levels=[0.05], colors="black", linewidths=0.8)
+    #plt.xlabel("Longitude")
+    #plt.ylabel("Latitude")
+    #plt.xlim(-6, 36.3)
+    #plt.ylim(30, 46)
 
-    # Grid points count 
+    # Grid points count
     # Define spatial boundaries for the Mediterranean domain
     lon_min, lon_max = -6, 36.3
     lat_min, lat_max = 30, 46
@@ -173,15 +173,15 @@ for idx_gp, gp in enumerate(group_centers):
     print(f"Total sea points: {total_sea_points}")
     print(f"Presence percentage: {presence_percentage:.1f}%") 
    
-    plt.title(f"Presence Map for Period: {gp:.1f} h ± {uncertainty} h ({presence_percentage:.1f}%)")
-    plt.savefig(os.path.join(output_plot_dir, f"mode_flag_amp_{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight") #{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight")
-    plt.close()
+    #plt.title(f"Presence Map for Period: {gp:.1f} h ± {uncertainty} h ({presence_percentage:.1f}%)")
+    #plt.savefig(os.path.join(output_plot_dir, f"mode_flag_amp_{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight") #{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight")
+    #plt.close()
 
 
-    # Rel amplitude
+    # Rel amplitude Med basin
     plt.figure(figsize=(10, 4))
     all_amp_vals.append(amp_field)
-    # Normalize to the max or to the 99th perc
+    # Normalize to the max or to the 99th perc (or to 100)
     #amp_percent = amp_field / np.nanmax(amp_field) * 100
     amp_percent = amp_field / np.nanpercentile(amp_field, 99) * 100
     masked_amp_pct = np.ma.masked_invalid(amp_percent)
@@ -219,6 +219,25 @@ for idx_gp, gp in enumerate(group_centers):
     plt.ylim(30, 46)
     plt.savefig(os.path.join(output_plot_dir, f"mode_amprelval_{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight") #{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight")
     plt.close()
+
+   # Rel amplitude Adriatic Sea
+    plt.figure(figsize=(5, 4))
+    im = plt.contourf(nav_lon, nav_lat, clipped_masked_amp_pct, levels=np.linspace(0, 100, 41), cmap=cmap_amp_pct)
+    plt.colorbar(im, label="Amplitude (% of max)")
+    plt.contourf(nav_lon, nav_lat, tmask, levels=[-1000, 0.05], colors="gray")
+    plt.contour(nav_lon, nav_lat, tmask, levels=[0.05], colors="black", linewidths=0.8)
+    if valid_levels:
+        CS_perc = plt.contour(nav_lon, nav_lat, masked_amp_pct,
+            levels=valid_levels, colors='k', linestyles='dashed', linewidths=0.5)
+    plt.clabel(CS_perc, inline=True, fontsize=7, fmt='%d%%', inline_spacing=0.2, manual=False)
+    plt.title(f"Amplitude for Mode with Period: {gp:.1f} h ± {uncertainty} h")
+    plt.xlabel("Longitude")
+    plt.ylabel("Latitude")
+    plt.xlim(12.0, 20.0)
+    plt.ylim(39, 46)
+    plt.savefig(os.path.join(output_plot_dir, f"mode_amprelval_{idx_gp}_{gp:.2f}h_AdrSea.png"), dpi=300, bbox_inches="tight") #{idx_gp}_{gp:.2f}h.png"), dpi=300, bbox_inches="tight")
+    plt.close()
+
 
 all_amp_vals=np.array(all_amp_vals)
 mask_all_amp_vals=all_amp_vals<2
