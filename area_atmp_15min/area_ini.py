@@ -1,0 +1,68 @@
+# Initialization file for the med modes areal procedure
+
+# Work directory
+work_dir='/work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_fg/area_20_newFFT/'
+
+# Flags ( 0->NO; 1->YES):
+# Choose ONLY one option per run
+flag_compute_modes=0
+flag_merge_modes=0
+flag_modes_analysis=0
+flag_modes_plot=1
+
+# Period to be analyzed (date format:YYYYMMDD)
+start_date='20150105'
+end_date='20150203'
+
+# Input path/name template (use * character for the dates in the string)
+#file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1ts_20*_2D_grid_T.nc'
+file_template='/work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_fg/input_files_15min/medfs-eas9_15m_20*_2D_grid_T.nc'
+
+# SSH time-serie frequency in seconds (e.g. for hourly ts 3600; for 15 minutes ts 900)
+dt=900
+
+# Mesh mask
+mesh_mask='/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc'
+# Bathymetry
+bathy_meter='/work/cmcc/ag15419/VAA_paper/DATA0/bathy_meter.nc'
+
+#####################################################
+
+# Flag to increase the num of functions used by FFT (set flag_nfft=1 and N_fft based on the SSH time-serie frequency, for dt=900 use 2048, for dt=3600 use 512)
+flag_nfft=1
+N_fft=2048
+
+# To apply a Hanning window (set flag_hanning != 0)
+flag_hanning=1
+
+# Flag and threshold [h] for filtering the spectrum the threshold is also used as plot minimum
+flag_filter='true'
+th_filter=40
+
+# Filter out modes with low amplitude, e.g. 0.10 means that all the modes with amplitude<10% of the total amplitude are rm (to avoid the filtering set amplitude_threshold_ratio = 0)
+amplitude_threshold_ratio=0.00000001
+# Filter out modes with low energy, e.g. 0.10 means that all the modes with energy<10% of the total energy in the analized point are rm (to avoid the filtering set energy_threshold_ratio = 0)
+energy_threshold_ratio=0.00000001
+
+# Number of modes to analyze (n_modes = 'auto' if you want to analyze all the modes)
+n_modes='auto'
+
+# Flag: use segmented (averaged) spectrum or full time series
+flag_segmented_spectrum=True  # False to disable and use full spectrum
+segment_len_days=20  # length of each segment (in days) if segmented spectrum is used
+
+# To order by period instead of by amplitude set flag_T_order = 1
+flag_T_order=1
+
+# Template for output file
+infile_amppha='/data/cmcc/ag15419/basin_modes/basin_modes_ini.nc'
+
+# Uncertainty of the modes periods (1 = variable uncertainty, 0 = fixed uncertainty)
+flag_var_unc=0
+# In case of fixed uncertainty = 0 fix the value
+fixed_uncertainty=0.01
+# In case of variable uncertainty add a % to the uncertainty due to the spectral resolution (e.g. 0.1 means (1+0.1)*theoretical_uncertainty )
+extra_unc=0.1
+# Fix a minimum value for tolerance
+min_unc=0.1
+
