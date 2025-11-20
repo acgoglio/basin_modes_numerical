@@ -1,7 +1,7 @@
 # Initialization file for the med modes areal procedure
 
 # Work directory
-work_dir='/work/cmcc/ag15419/basin_modes_num_wind_m_lth/area/'
+work_dir='/work/cmcc/ag15419/basin_modes/basin_modes_num_wind_m_lth/area/'
 
 # Flags ( 0->NO; 1->YES):
 flag_compute_modes=0
@@ -53,4 +53,4 @@ flag_var_unc=1
 # In case of fixed uncertainty = 0 fix the value
 fixed_uncertainty=0.2
 # In case of variable uncertainty add a % to the uncertainty due to the spectral resolution (e.g. 0.1 means (1+0.1)*theoretical_uncertainty )
-extra_unc=0.1
+extra_unc=0.4
