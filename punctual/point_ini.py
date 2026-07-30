@@ -1,7 +1,7 @@
 # Initialization file for the med modes punctual procedure
 
 # Work directory
-work_dir="/work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_fg/point/"
+work_dir='/work/cmcc/ag15419/basin_modes_new/basin_modes_1_fg/point_20_newFFT_bf2/'
 
 # Period to be analyzed (date format:YYYYMMDD)
 start_date="20150104"
@@ -17,15 +17,21 @@ end_date="20150203"
 # Relaxation after perturbation by atmospheric pressure (Pref + 100 hPa)
 #file_template="/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc"
 # Relaxation after perturbation by atmospheric pressure (Pref + 100 hPa) 15 minutes
-file_template="/work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_fg/input_files_15min/medfs-eas9_15m_20*_2D_grid_T.nc"
+#file_template="/work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_fg/input_files_15min/medfs-eas9_15m_20*_2D_grid_T.nc"
 # Relaxation after perturbation by atmospheric pressure (Pref + 100 hPa) without Coriolis (f=0) 15 minutes
 #file_template="/work/cmcc/ag15419/basin_modes_new/basin_modes_num_15_g/input_files_15min/medfs-eas9_15m_20*_2D_grid_T.nc"
+# BF-4
+#file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp_BF4/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
+# BF-3
+#file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp_BF3/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
+# BF-2
+file_template='/work/cmcc/ag15419/exp/EAS9BT_med-modes_atmp/EXP00/20*/model/medfs-eas9_1h_20*_2D_grid_T.nc'
 
 # Exp tag
-tag="atmp_15m_h_"
+tag="atmp_bf2_h_"
 
 # SSH time-serie frequency in seconds (e.g. for hourly ts 3600; for 15 minutes ts 900)
-dt=900
+dt=3600
 
 # Bathymetry
 bathy_meter="/work/cmcc/ag15419/VAA_paper/DATA0/bathy_meter.nc"
@@ -36,8 +42,8 @@ mesh_mask="/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc"
 #######################################
 
 # Flag to increase the num of functions used by FFT (set flag_nfft=1 and N_fft based on the SSH time-serie frequency, for dt=900 use 2048, for dt=3600 use 512)
-flag_nfft=0
-N_fft=2048
+flag_nfft=1
+N_fft=512
 
 # To apply a Hanning window (set flag_hanning != 0)
 flag_hanning=1
@@ -63,7 +69,7 @@ energy_threshold_ratio=0.002
 
 # Flag: use segmented (averaged) spectrum or full time series
 flag_segmented_spectrum=True  # False to disable and use full spectrum
-segment_len_days=10  # length of each segment (in days) if segmented spectrum is used
+segment_len_days=20  # length of each segment (in days) if segmented spectrum is used
 
 # Coordinate file (list of points to be analyzed)
 coo_file='idx_pt.coo'
