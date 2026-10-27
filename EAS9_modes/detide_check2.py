@@ -69,7 +69,7 @@ from f_detide import (
 ########################################################################
 
 COO_FILE = "idx_pt.coo"                   # formato: "i j nome", i = x, j = y; '#' = commento
-CHECK_WINDOWS = ["OND_2022", "JFM_2020"]  # chiavi di ini.WINDOWS
+CHECK_WINDOWS = ["2022"] #"OND_2022", "JFM_2020"]  # chiavi di ini.WINDOWS
 TS_DAYS = 7                               # giorni di serie temporale nel pannello (a)
 PERIOD_RANGE_PLOT = (4.0, 40.0)           # [h] asse x dello spettro
 
@@ -318,7 +318,7 @@ for wkey in CHECK_WINDOWS:
         ax2.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
         ax2.set_xlabel("Period [h]")
         ax2.set_ylabel("Amplitude [cm]")
-        ax2.set_title(f"Amplitude spectrum ({kind} settings, as in the pipeline): "
+        ax2.set_title(f"Amplitude spectrum: "
                       f"mode bands in yellow, tidal constituents in blue", pad=38)
         ax2.legend(loc="upper right")
         ax2.grid(ls="--", lw=0.4, alpha=0.5, which="both")

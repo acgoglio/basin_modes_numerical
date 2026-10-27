@@ -374,7 +374,7 @@ axa.legend(handles=[
     Line2D([0], [0], color="tab:red", lw=1.4,
            label="Detected spectral peak"),
     Patch(facecolor="0.85", edgecolor="none",
-          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h Peaks: see Appendix")],
+          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h Peaks")],
     loc="upper right", fontsize=7.5, framealpha=0.95, ncol=1,
     borderpad=0.4, handlelength=1.6)
 
@@ -410,7 +410,7 @@ axb.legend(handles=[
     Line2D([0], [0], color="0.35", linestyle=":", linewidth=1.0,
            label=f"Coverage threshold ({MIN_COV:.0f}%)"),
     Patch(facecolor="0.85", edgecolor="none",
-          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h Modes: see Appendix")],
+          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h Modes")],
     loc="upper right", fontsize=7.5, framealpha=0.95, ncol=2,
     borderpad=0.4, handlelength=1.6, columnspacing=1.0)
 

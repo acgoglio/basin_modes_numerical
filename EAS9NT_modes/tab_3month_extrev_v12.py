@@ -102,6 +102,8 @@ def draw_manual_panel(ax, matrix, xticklabels, title, xlabel, rotate_x=0, ha=Non
     for r in range(n_rows):
         for c in range(n_cols):
             v = matrix[r, c]
+            if not np.isnan(v):
+                v = float(f"{v:.1f}")
             color = value_to_color(v)
             ax.add_patch(Rectangle((c, n_rows - 1 - r), 1, 1, facecolor=color,
                                     edgecolor="white", linewidth=0.5))

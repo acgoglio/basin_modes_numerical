@@ -24,7 +24,7 @@ mpl.use("Agg")
 
 import forced_windows_ini as ini
 
-RESULTS_FILE = "/work/cmcc/ag15419/basin_modes_new/basin_modes_EAS9/merged/forced_modes_results.npz"
+RESULTS_FILE = "/work/cmcc/ag15419/basin_modes_new/basin_modes_EAS9_tides/merged/forced_modes_results.npz"
 
 npz = np.load(RESULTS_FILE, allow_pickle=True)
 
@@ -213,6 +213,6 @@ draw_manual_panel(ax1, diff_trimester, ref_trimester, events_labels,
                    rotate_x=45, ha="right")
 draw_manual_colorbar(fig, [0.87, 0.3, 0.03, 0.4], "Difference (cm)")
 
-plt.savefig("heatmap_events_vs_annual_trimester_diff_EAS9.png", dpi=300, bbox_inches="tight")
-print("\nSalvato: heatmap_events_vs_annual_trimester_diff_EAS9.png")
+plt.savefig("heatmap_events_vs_annual_trimester_diff_EAS9_tides.png", dpi=300, bbox_inches="tight")
+print("\nSalvato: heatmap_events_vs_annual_trimester_diff_EAS9_tides.png")
 plt.close(fig)

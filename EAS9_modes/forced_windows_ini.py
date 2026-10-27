@@ -127,7 +127,7 @@ QPRJ = "0723"
 # Esperimento da analizzare (template e work_dir insieme, per non
 # scrivere gli output della run con maree nella cartella della NT)
 # ---------------------------------------------------------------
-EXPERIMENT = "EAS9_simu"   # "EAS9_minr_nt" (senza maree) | "EAS9_simu" (con maree)
+EXPERIMENT = "EAS9_simu_tides"   # "EAS9_minr_nt" (senza maree) | "EAS9_simu" (con maree detided) | "EAS9_simu_tides" (con maree)
 
 _EXPERIMENTS = {
     "EAS9_minr_nt": {
@@ -140,6 +140,11 @@ _EXPERIMENTS = {
                     "medfs-eas9_1h_{yyyymmdd}_2D_grid_T.nc",
         "work_dir": "/work/cmcc/ag15419/basin_modes_new/basin_modes_EAS9/",
     },
+    "EAS9_simu_tides": {
+        "template": "/work/cmcc/med-dev/exp/EAS9-simu/EXP00/{yyyymmdd}/model/"
+                    "medfs-eas9_1h_{yyyymmdd}_2D_grid_T.nc",
+        "work_dir": "/work/cmcc/ag15419/basin_modes_new/basin_modes_EAS9_tides/",
+    },
 }
 forced_run_daily_template = _EXPERIMENTS[EXPERIMENT]["template"]
 work_dir = _EXPERIMENTS[EXPERIMENT]["work_dir"]
@@ -147,7 +152,7 @@ work_dir = _EXPERIMENTS[EXPERIMENT]["work_dir"]
 # ---------------------------------------------------------------
 # Detiding (solo per la run con maree)
 # ---------------------------------------------------------------
-flag_detide = True
+flag_detide = False
 AMPPHA_FILE = ("/data/cmcc/ag15419/harmonic_analysis/quid_EAS9/area_EAS9_inserr_2022/"
                "amppha2D_0_sossheig_20220701_20221231_mod_medfs-eas9.nc")
 TIDE_CONSTITUENTS = ["M2", "S2", "K1", "O1", "N2", "P1", "Q1", "K2"]
@@ -169,7 +174,7 @@ mesh_mask = "/work/cmcc/ag15419/VAA_paper/DATA0/mesh_mask.nc"
 bathy_meter = "/work/cmcc/ag15419/VAA_paper/DATA0/bathy_meter.nc"
 
 # Directory di output
-work_dir = "/work/cmcc/ag15419/basin_modes_new/basin_modes_EAS9/" 
+#work_dir = "/work/cmcc/ag15419/basin_modes_new/basin_modes_EAS9/" 
 
 # ---------------------------------------------------------------
 # Parametri spettro (stessi flag di area_ini.py, per compatibilita'

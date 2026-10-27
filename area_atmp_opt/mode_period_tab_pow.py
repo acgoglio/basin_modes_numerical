@@ -301,7 +301,7 @@ axa.legend(handles=[
     Line2D([0], [0], color="tab:red", lw=1.4,
            label="period detected at individual grid points"),
     Patch(facecolor="0.85", edgecolor="none",
-          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h: see Appendix")],
+          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h")],
     loc="upper right", fontsize=7.5, framealpha=0.95, ncol=1,
     borderpad=0.4, handlelength=1.6)
 
@@ -318,7 +318,7 @@ axb.legend(handles=[
           label=("grouped mode (bar width = grouping window)" if BAR_FULL
                  else "grouped mode (bar width = spectral resolution)")),
     Patch(facecolor="0.85", edgecolor="none",
-          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h: see Appendix")],
+          label=f"{TMIN_CUT:.0f}-{TMIN_SHADE:.0f} h")],
     loc="upper right", fontsize=7.5, framealpha=0.95, ncol=1,
     borderpad=0.4, handlelength=1.6)
 
